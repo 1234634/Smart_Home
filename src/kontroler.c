@@ -1,17 +1,37 @@
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <mqtt.h>
 #include "templates/posix_sockets.h"
-#include"mqtt_helper.h"
+#include "mqtt_helper.h"
+
+
+//function does nothing (it is used to remove warnings of unused param)
+void foo(const char*,const char*,const char*);
+//sets value of addr,port,topic through command line arguments
+void set_arguments(const char**,const char**,const char**,int,const char*[] );
+
+
+//reads value from GPIO PIN
+int read_pin(int  );
+
+//daemon that publishes sensors value 
+void * publish_daemon(void * );
+
+struct pub_packet
+{
+	struct mqtt_client* client;
+	int socket;
+	pthread_t* client_daemon;
+
+};
 
 
 
 int main(int argc, const char *argv[]) 
 {
-
-/********************* INITIALISATION ********************************/
     const char* addr;
     const char* port;
     const char* topic;
@@ -70,28 +90,59 @@ int main(int argc, const char *argv[])
         exit_example(EXIT_FAILURE, sockfd, NULL);
 
     }
-/********************* END_OF_INITIALISATION**************************/
+
+
+    struct pub_packet packet;
+    packet.client = &client;
+    packet.socket = sockfd;
+    packet.client_daemon = &client_daemon;
+      
+    pthread_t temp_thread;
+    pthread_create(&temp_thread,NULL,&publish_daemon,&packet);
+
+    sleep(3);
+
+    printf("Ja sam izvan treda ");
+    pthread_join(temp_thread, NULL);
+
+    exit(0);
 
 
 
-
-
-    /* subscribe */
-    mqtt_subscribe(&client, topic, 0);
-
-    /* start publishing the time */
-    printf("%s listening for '%s' messages.\n", argv[0], topic);
-    printf("Press CTRL-D to exit.\n\n");
-    
-    /* block */
-    while(fgetc(stdin) != EOF); 
-    
+  
     /* disconnect */
     printf("\n%s disconnecting from %s\n", argv[0], addr);
     sleep(1);
 
     /* exit */ 
     exit_example(EXIT_SUCCESS, sockfd, &client_daemon);
+}
+int read_pin(int arg_pin )
+{
+        return 25;
+
+}
+
+void * publish_daemon(void * arg_packet)
+{
+
+   struct pub_packet *packet = (struct pub_packet*)arg_packet;        
+    const char *topic = "home/living_room/temperature";// topic
+    while(1) {
+        
+        char application_message[] = " Hello World";
+        printf(" published : \"%s\"   %s \n", application_message,topic);
+        sleep(1);
+      mqtt_publish((packet->client), topic, application_message, strlen(application_message) + 1, MQTT_PUBLISH_QOS_0);
+
+        if ((*(packet->client)).error != MQTT_OK) {
+            fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
+            exit_example(EXIT_FAILURE, packet->socket, packet->client_daemon);
+        }
+     
+    }   
+        
+    return NULL;
 }
 
 
