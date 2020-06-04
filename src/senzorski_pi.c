@@ -2,16 +2,34 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include<string.h>
 #include <mqtt.h>
 #include "templates/posix_sockets.h"
 #include "mqtt_helper.h"
+#include "device.c"
+#define SENSORS "sensors"
+#define ACTUATORS "actuators"
+#define MAX_DEVICES 20
+#define SENSORS_READ_DELAY 3
+#define CONTROLER_TOPIC "controler"
 
+static Device Devices[MAX_DEVICES];
+static int last_elem_index = 0; 
+
+//updates states of sensors and publishes change to controler
+void* update_sensors_state(int , void*); 
+
+//publishes sensors states on every 3 seconds
+void * sensors_state_publish(void * );
 
 //function does nothing (it is used to remove warnings of unused param)
 void foo(const char*,const char*,const char*);
+
 //sets value of addr,port,topic through command line arguments
 void set_arguments(const char**,const char**,const char**,int,const char*[] );
+
+
+
 
 
 //reads value from GPIO PIN
@@ -90,7 +108,17 @@ int main(int argc, const char *argv[])
         exit_example(EXIT_FAILURE, sockfd, NULL);
 
     }
+    Device temperature_sensor;
+    strcpy(temperature_sensor.id,"temperature_sensor_living_room");
+    strcpy(temperature_sensor.group,SENSORS);
+    strcpy(temperature_sensor.value,"25lr");
+    strcpy(temperature_sensor.gpio_pin,"13");
+    strcpy(temperature_sensor.topic,"home/living_room/temperature");
+    
+    Devices[last_elem_index++] = temperature_sensor;    
 
+
+    mqtt_subscribe(&client, "Kontroler", 0);
 
     struct pub_packet packet;
     packet.client = &client;
@@ -98,7 +126,7 @@ int main(int argc, const char *argv[])
     packet.client_daemon = &client_daemon;
       
     pthread_t temp_thread;
-    pthread_create(&temp_thread,NULL,&publish_daemon,&packet);
+    pthread_create(&temp_thread,NULL,&sensors_state_publish,&packet);
 
     sleep(3);
 
@@ -123,6 +151,43 @@ int read_pin(int arg_pin )
 
 }
 
+void* update_sensors_state(int arg_dev_index, void* arg_packet)
+{
+	
+
+}
+
+
+void * sensors_state_publish(void * arg_packet)
+{
+	int i;
+   	struct pub_packet *packet = (struct pub_packet*)arg_packet;        
+	while(1)
+	{
+
+		for ( i = 0; i < last_elem_index; i++)
+		{
+			if( !strcmp(Devices[i].group, SENSORS))
+			{
+        			printf(" published : 	 \n" );
+				update_sensors_state(i,arg_packet); // updating state and publishing change to controler
+				mqtt_publish((packet->client), Devices[0].topic, Devices[0].value, strlen( Devices[0].value) + 1, MQTT_PUBLISH_QOS_0);
+
+       				if ((*(packet->client)).error != MQTT_OK) {
+            				fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
+           				exit_example(EXIT_FAILURE, packet->socket, packet->client_daemon);
+				}
+			}
+		}
+		sleep(SENSORS_READ_DELAY);	
+	}
+
+	return NULL;
+}
+
+
+
+
 void * publish_daemon(void * arg_packet)
 {
 
@@ -133,7 +198,7 @@ void * publish_daemon(void * arg_packet)
         char application_message[] = "Iz Senzora";
         printf(" published : \"%s\"   %s \n", application_message,topic);
         sleep(1);
-      mqtt_publish((packet->client), topic, application_message, strlen(application_message) + 1, MQTT_PUBLISH_QOS_0);
+      mqtt_publish((packet->client), Devices[0].topic, Devices[0].value, strlen( Devices[0].value) + 1, MQTT_PUBLISH_QOS_0);
 
         if ((*(packet->client)).error != MQTT_OK) {
             fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
