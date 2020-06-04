@@ -3,8 +3,8 @@ Home that is smart.
 
 Runing:
 
-cd Smart_Home
-make
+cd Smart_Home    
+make    
 ./bin/senzorski_pi
 
 in othre terminal:
