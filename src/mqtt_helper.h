@@ -22,7 +22,7 @@ void exit_example(int status, int sockfd, pthread_t *client_daemon)
 }
 
 
-void publish_callback(void** unused, struct mqtt_response_publish *published) 
+void publish_callback2(void** unused, struct mqtt_response_publish *published) 
 {
      /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
    
