@@ -1,4 +1,4 @@
-
+#include<time.h> 
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,20 +7,33 @@
 #include "templates/posix_sockets.h"
 #include "mqtt_helper.h"
 #include "device.c"
+
+
+
+#define ADDR "test.mosquitto.org"
+#define PORT "1883"
 #define SENSORS "sensors"
 #define ACTUATORS "actuators"
 #define MAX_DEVICES 20
 #define SENSORS_READ_DELAY 3
 #define CONTROLER_TOPIC "controler"
-
+#define DEVICES_INFO_TOPIC "devices/info"//device tema bez oznakom funkcionalnosti
+#define DEVICES_FUNC_TOPIC "devices/func" //device tema sa oznakom funkcionalnosti
+#define GET_PROPERTY_VALUE "Get_Property_Value"
+#define SET_PROPERTY_VALUE "Set_Property_Value"
+#define GET_DEV_INFO "Get_Dev_Info"
+#define SET_DEV_INFO "Set_Dev_Info"
+#define PROPERTY_CHANGED "PropertyChanged"
 static Device Devices[MAX_DEVICES];
 static int last_elem_index = 0; 
 
+//reads value from GPIO PIN
+char* read_pin(int );
 //updates states of sensors and publishes change to controler
-void* update_sensors_state(int , void*); 
+void* update_sensors_value(int , void*); 
 
 //publishes sensors states on every 3 seconds
-void * sensors_state_publish(void * );
+void * sensors_value_publish(void * );
 
 //function does nothing (it is used to remove warnings of unused param)
 void foo(const char*,const char*,const char*);
@@ -32,8 +45,6 @@ void set_arguments(const char**,const char**,const char**,int,const char*[] );
 
 
 
-//reads value from GPIO PIN
-int read_pin(int  );
 
 //daemon that publishes sensors value 
 void * publish_daemon(void * );
@@ -47,32 +58,16 @@ struct pub_packet
 };
 
 
-
 int main(int argc, const char *argv[]) 
 {
-    const char* addr;
-    const char* port;
-    const char* topic;
+    const char* addr= ADDR;
+    const char* port = PORT;
 
-    /* get address (argv[1] if present) */
+    /* add new device*/
     if (argc > 1) {
         addr = argv[1];
     } else {
         addr = "test.mosquitto.org";
-    }
-
-    /* get port number (argv[2] if present) */
-    if (argc > 2) {
-        port = argv[2];
-    } else {
-        port = "1883";
-    }
-
-    /* get the topic name to publish */
-    if (argc > 3) {
-        topic = argv[3];
-    } else {
-        topic = "home/living_room/temperature";
     }
 
     /* open the non-blocking TCP socket (connecting to the broker) */
@@ -112,9 +107,9 @@ int main(int argc, const char *argv[])
     strcpy(temperature_sensor.id,"temperature_sensor_living_room");
     strcpy(temperature_sensor.group,SENSORS);
     strcpy(temperature_sensor.value,"25lr");
-    strcpy(temperature_sensor.gpio_pin,"13");
+    temperature_sensor.gpio_pin = 13;
     strcpy(temperature_sensor.topic,"home/living_room/temperature");
-    
+    snprintf(temperature_sensor.info,212,"id: %s; Group: %s",temperature_sensor.id,temperature_sensor.group); 
     Devices[last_elem_index++] = temperature_sensor;    
 
 
@@ -126,13 +121,12 @@ int main(int argc, const char *argv[])
     packet.client_daemon = &client_daemon;
       
     pthread_t temp_thread;
-    pthread_create(&temp_thread,NULL,&sensors_state_publish,&packet);
+    pthread_create(&temp_thread,NULL,&sensors_value_publish,&packet);
 
-    sleep(3);
-
-    printf("Ja sam izvan treda ");
     pthread_join(temp_thread, NULL);
 
+    
+    int i;
     exit(0);
 
 
@@ -145,20 +139,45 @@ int main(int argc, const char *argv[])
     /* exit */ 
     exit_example(EXIT_SUCCESS, sockfd, &client_daemon);
 }
-int read_pin(int arg_pin )
+char* read_pin(int arg_pin )
+{      
+        srand(time(0)); 
+        int value = (rand()%10 + 20);
+
+        static char temp[20];
+        sprintf(temp,"%dlr",value);
+        return temp;
+}
+
+
+
+void* update_sensors_value(int arg_index, void* arg_packet)
 {
-        return 25;
+   	struct pub_packet *packet = (struct pub_packet*)arg_packet;        
+    char * new_value = read_pin(Devices[arg_index].gpio_pin);
+    char message[400];
+
+    if( strcmp(new_value,Devices[arg_index].value) != 0)
+    {
+	    strcpy(Devices[arg_index].value,new_value);
+
+        sprintf(message,"%s.%s.value.%s",PROPERTY_CHANGED,Devices[arg_index].id,Devices[arg_index].value);
+        mqtt_publish((packet->client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+        printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);        
+
+   		if ((*(packet->client)).error != MQTT_OK) 
+         {
+            fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
+            exit_example(EXIT_FAILURE, packet->socket, packet->client_daemon);
+         }
+
+    }
+    return NULL; 
 
 }
 
-void* update_sensors_state(int arg_dev_index, void* arg_packet)
-{
-	
 
-}
-
-
-void * sensors_state_publish(void * arg_packet)
+void * sensors_value_publish(void * arg_packet)
 {
 	int i;
    	struct pub_packet *packet = (struct pub_packet*)arg_packet;        
@@ -167,16 +186,18 @@ void * sensors_state_publish(void * arg_packet)
 
 		for ( i = 0; i < last_elem_index; i++)
 		{
-			if( !strcmp(Devices[i].group, SENSORS))
+			if( strcmp(Devices[i].group, SENSORS) == 0)
 			{
-        			printf(" published : 	 \n" );
-				update_sensors_state(i,arg_packet); // updating state and publishing change to controler
-				mqtt_publish((packet->client), Devices[0].topic, Devices[0].value, strlen( Devices[0].value) + 1, MQTT_PUBLISH_QOS_0);
+			
+				update_sensors_value(i,arg_packet); // updating state and publishing change to controler
+				mqtt_publish((packet->client), Devices[i].topic, Devices[i].value, strlen( Devices[i].value) + 1, MQTT_PUBLISH_QOS_0);
+        		printf(" published : topic:%s; %s\n",Devices[i].topic, Devices[i].value );
 
-       				if ((*(packet->client)).error != MQTT_OK) {
-            				fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
-           				exit_example(EXIT_FAILURE, packet->socket, packet->client_daemon);
-				}
+       			if ((*(packet->client)).error != MQTT_OK)
+                {
+            		fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
+           			exit_example(EXIT_FAILURE, packet->socket, packet->client_daemon);
+			    }
 			}
 		}
 		sleep(SENSORS_READ_DELAY);	
