@@ -1,60 +1,68 @@
-
+#include<time.h> 
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include<string.h>
 #include <mqtt.h>
 #include "templates/posix_sockets.h"
-#include "mqtt_helper.h"
+//#include "mqtt_helper.h"
+#include "device.c"
+#include"parse.h"
+
+#define ADDR "test.mosquitto.org"
+#define PORT "1883"
+#define SENSORS "sensors"
+#define ACTUATORS "actuators"
+#define MAX_DEVICES 20
+#define SENSORS_READ_DELAY 3
+#define CONTROLER_TOPIC "controler"
+#define DEVICES_INFO_TOPIC "devices/info"//device tema bez oznakom funkcionalnosti
+#define DEVICES_FUNC_TOPIC "devices/func" //device tema sa oznakom funkcionalnosti
+#define GET_DEV_VALUE "Get_Dev_Value"
+#define SET_DEV_VALUE "Set_Dev_Value"
+#define GET_DEV_INFO "Get_Dev_Info"
+#define SET_DEV_INFO "Set_Dev_Info"
+#define PROPERTY_CHANGED "PropertyChanged"
+#define SENSOR_MES "Sensor_Mes"
+#define DELIMITER '.'
+#define SENZORSKI_PI_TOPIC "senzorski_pi"
+#define AKTUATORSKI_PI_TOPIC "aktuatorski_pi"
 
 
-//function does nothing (it is used to remove warnings of unused param)
-void foo(const char*,const char*,const char*);
-//sets value of addr,port,topic through command line arguments
-void set_arguments(const char**,const char**,const char**,int,const char*[] );
+static Device Devices[MAX_DEVICES];
+static int last_elem_index = 0; 
 
 
-//reads value from GPIO PIN
-int read_pin(int  );
+void* distribute_pub_message(void* );
+void publish_callback(void** , struct mqtt_response_publish *); 
+//updates states of sensors and publishes change to controler
+//void* update_sensors_value(int ); 
 
-//daemon that publishes sensors value 
-void * publish_daemon(void * );
+//publishes sensors states on every 3 seconds
 
-struct pub_packet
-{
-	struct mqtt_client* client;
-	int socket;
-	pthread_t* client_daemon;
 
-};
 
+
+
+
+
+static struct callback_packets callback_packet;
+static struct pub_packet packet;
 
 
 int main(int argc, const char *argv[]) 
 {
-    const char* addr;
-    const char* port;
-    const char* topic;
 
-    /* get address (argv[1] if present) */
+/********************* INITIALISATION ********************************/
+    
+    const char* addr= ADDR;
+    const char* port = PORT;
+
+    /* add new device*/
     if (argc > 1) {
         addr = argv[1];
     } else {
         addr = "test.mosquitto.org";
-    }
-
-    /* get port number (argv[2] if present) */
-    if (argc > 2) {
-        port = argv[2];
-    } else {
-        port = "1883";
-    }
-
-    /* get the topic name to publish */
-    if (argc > 3) {
-        topic = argv[3];
-    } else {
-        topic = "home/living_room/temperature";
     }
 
     /* open the non-blocking TCP socket (connecting to the broker) */
@@ -90,21 +98,31 @@ int main(int argc, const char *argv[])
         exit_example(EXIT_FAILURE, sockfd, NULL);
 
     }
-
-
-    struct pub_packet packet;
     packet.client = &client;
     packet.socket = sockfd;
     packet.client_daemon = &client_daemon;
+/********************* END_OF_INITIALISATION**************************/
+
+    
+ /*  Device temperature_aktuator;
+    strcpy(temperature_aktuator.id,"temp_aktuator_lroom");
+    strcpy(temperature_aktuator.group,ACTUATORS);
+    strcpy(temperature_aktuator.value,"OFF");
+    temperature_aktuator.gpio_pin = 15;
+    strcpy(temperature_aktuator.topic,"home/living_room/temperature");
+    snprintf(temperature_aktuator.info,250,"id: %s; Group: %s Controlable: %s",temperature_aktuator.id,temperature_aktuator.group,"Yes"); 
+    temperature_aktuator.condition = 25;
+    Devices[last_elem_index++] = temperature_aktuator;
+*/
+
+
+    
+    
+    mqtt_subscribe(&client,CONTROLER_TOPIC, 0);
       
-    pthread_t temp_thread;
-    pthread_create(&temp_thread,NULL,&publish_daemon,&packet);
 
-    sleep(3);
-
-    printf("Ja sam izvan treda ");
-    pthread_join(temp_thread, NULL);
-
+    while(fgetc(stdin) != EOF); 
+  
     exit(0);
 
 
@@ -117,32 +135,101 @@ int main(int argc, const char *argv[])
     /* exit */ 
     exit_example(EXIT_SUCCESS, sockfd, &client_daemon);
 }
-int read_pin(int arg_pin )
+
+
+void* distribute_pub_message(void* arg)
 {
-        return 25;
+    char** tokens;
+    tokens = str_split(callback_packet.mes, DELIMITER);
 
-}
+    char * mes_type = *(tokens + 0);
+   
+    if( strcmp(mes_type,GET_DEV_INFO) == 0)
+    {
 
-void * publish_daemon(void * arg_packet)
-{
+        //iz svoje liste deviceova nadje info 
+        //mqtt_publish( UI_TOPIC, tja info sto je nasao)
+        // ne zaboravi da proveris dal je id = * i onda da spakujes 
+        // sve deviceove u poruku i da mu posaljes 
+   
+    }
+    else if(strcmp(mes_type,GET_DEV_VALUE) == 0)
+    {
 
-   struct pub_packet *packet = (struct pub_packet*)arg_packet;        
-    const char *topic = "home/living_room/temperature";// topic
-    while(1) {
-        
-        char application_message[] = " Hello World";
-        printf(" published : \"%s\"   %s \n", application_message,topic);
-        sleep(1);
-      mqtt_publish((packet->client), topic, application_message, strlen(application_message) + 1, MQTT_PUBLISH_QOS_0);
-
-        if ((*(packet->client)).error != MQTT_OK) {
-            fprintf(stderr, "error: %s\n", mqtt_error_str((*(packet->client)).error));
-            exit_example(EXIT_FAILURE, packet->socket, packet->client_daemon);
-        }
+        //isto kao get dev info  
      
-    }   
-        
+    }
+    else if(strcmp(mes_type,SET_DEV_VALUE) == 0)
+    {
+
+        //ovde kontroler samo prosledjuje a kad mu jave propertyChanged
+        //onda menja i u svojoj listi uredjaja
+        // ovako ko sto pise , DEVICES_FUNC_TOPIC tema funkcionalnosti
+        // na tu temu se pretplacuju aktuatori jer su im values controlabilne
+         // mqtt_publish((packet.client), DEVICES_FUNC_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+         // printf(" published : topic:%s; %s\n",DEVICES_FUNC_TOPIC, message );
+
+     //mqtt_publish(UI_TOPIC...); odmah javi UI da je setovano
+    
+    }
+    else if(strcmp(mes_type,SET_DEV_INFO) == 0)
+    {
+
+        // slicno prethodnoj samo je topic INFO
+         // mqtt_publish((packet.client), DEVICES_INFO_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+         // printf(" published : topic:%s; %s\n",DEVICES_FUNC_TOPIC, message );
+            
+     //mqtt_publish(UI_TOPIC...); odmah javi UI da je setovano
+    
+    }
+    else if(strcmp(mes_type,PROPERTY_CHANGED) == 0)
+    {
+    
+        // vidi koji se property promenio i promeni ga 
+        // u svojoj listi device-ova
+
+    }
+    else    
+    {
+    
+    //
+    
+    }
+    free(tokens);
+
     return NULL;
 }
+
+void publish_callback(void** unused, struct mqtt_response_publish *published) 
+{
+     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
+   
+    pthread_t temp_thread;
+
+    string_cpy(& callback_packet.topic,published->topic_name, published->topic_name_size);  
+    string_cpy(& callback_packet.mes,published->application_message, published->application_message_size);
+
+    printf("Received publish('%s'): %s\n",callback_packet.topic , callback_packet.mes);
+    
+    /*
+        ovde prvo proveriti da li device sa tim id postoji 
+        if(postoji)
+            pthread_create
+        else
+            mqtt_publish(UI_TOPIC, "ne postoji  taj device");
+     * */
+
+
+   pthread_create(&temp_thread,NULL,&distribute_pub_message,NULL);
+
+}
+
+
+
+
+
+
+
+
 
 

@@ -101,6 +101,10 @@ int main(int argc, const char *argv[])
         exit_example(EXIT_FAILURE, sockfd, NULL);
 
     }
+    
+    packet.client = &client;
+    packet.socket = sockfd;
+    packet.client_daemon = &client_daemon;
 /********************* END_OF_INITIALISATION**************************/
 
     
@@ -130,9 +134,6 @@ int main(int argc, const char *argv[])
     mqtt_subscribe(&client,DEVICES_INFO_TOPIC, 0);
     mqtt_subscribe(&client,DEVICES_FUNC_TOPIC, 0);
 
-    packet.client = &client;
-    packet.socket = sockfd;
-    packet.client_daemon = &client_daemon;
       
     pthread_t temp_thread;
    pthread_create(&temp_thread,NULL,&sensors_value_publish,&packet);
