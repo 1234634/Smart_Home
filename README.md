@@ -8,5 +8,5 @@ make
 ./bin/senzorski_pi
 
 in other terminal:    
-cd Smart_Home
+cd Smart_Home    
 ./bin/aktuatorski_pi
