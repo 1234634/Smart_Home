@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#define MAX_BUF_LEN 5000
 
 void string_cpy(char** arg_cpy, const char* arg_string, int arg_size)
 {
@@ -40,7 +41,7 @@ char** str_split(char* a_str, const char a_delim)
        knows where the list of returned strings ends. */
     count++;
 
-                                                                                                                            
+
    result =  (char**)malloc(sizeof(char*) * count);
 
     if (result)
@@ -61,3 +62,28 @@ char** str_split(char* a_str, const char a_delim)
     return result;
 }
 
+
+
+void help()
+{
+    unsigned char src[MAX_BUF_LEN + 1];                                              //Bafer u koji se ucitavaju podaci
+	FILE *fp = fopen("src/commands", "rb");                                        //Otvaranje fajla koji se cita
+	if (fp != NULL)                                                         //Ako je fajl uspesno otvoren
+    {
+		size_t new_len = fread(src, sizeof(char), MAX_BUF_LEN, fp);         //Funkcija koja iz fajla upisuje karaktere u bafer src duzine MAX_BUF_LEN i smesta duzinu upsanob u new_len
+		//printf("new len = %d", new_len);
+		if ( ferror( fp ) != 0 )                                            //Ako se dogodi greska pri citanju fajla
+		{
+			fputs("Greska pri citanju fajla", stderr);                      //Ispis stringa kao greske
+		}
+        printf("%s", src);
+		fclose(fp);                                                         //Zatvaranje fajla
+	}
+	else
+    {
+        printf("Nemere\n");
+    }
+
+
+
+}

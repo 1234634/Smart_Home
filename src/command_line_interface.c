@@ -1,4 +1,4 @@
-#include<time.h> 
+#include<time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,6 +24,8 @@
 #define PROPERTY_CHANGED "PropertyChanged"
 #define SENSOR_MES "Sensor_Mes"
 #define DELIMITER '.'
+#define BLANKSPACE ' '
+#define HELP "--help"
 #define CONTROLER_TOPIC "controler"
 #define SENZORSKI_PI_TOPIC "senzorski_pi"
 #define AKTUATORSKI_PI_TOPIC "aktuatorski_pi"
@@ -31,13 +33,13 @@
 
 
 static Device Devices[MAX_DEVICES];
-static int last_elem_index = 0; 
+static int last_elem_index = 0;
 
 
 void* distribute_pub_message(void* );
-void publish_callback(void** , struct mqtt_response_publish *); 
+void publish_callback(void** , struct mqtt_response_publish *);
 //updates states of sensors and publishes change to controler
-//void* update_sensors_value(int ); 
+//void* update_sensors_value(int );
 
 //publishes sensors states on every 3 seconds
 void * sensors_value_publish(void * );
@@ -54,11 +56,11 @@ static struct callback_packets callback_packet;
 static struct pub_packet packet;
 
 
-int main(int argc, const char *argv[]) 
+int main(int argc, const char *argv[])
 {
 
 /********************* INITIALISATION ********************************/
-    
+
     const char* addr= ADDR;
     const char* port = PORT;
 
@@ -104,7 +106,7 @@ int main(int argc, const char *argv[])
     }
 /********************* END_OF_INITIALISATION**************************/
 
-    
+
 
 
     mqtt_subscribe(&client,UI_TOPIC, 0);
@@ -112,40 +114,94 @@ int main(int argc, const char *argv[])
     packet.client = &client;
     packet.socket = sockfd;
     packet.client_daemon = &client_daemon;
-      
 
-    //while(fgetc(stdin) != EOF); 
-   /* char message[500];
     while(1)
     {
-   
-        strcpy(message,get_user_input());  
+        printf("Please enter a command: \n");
+        char input[40];
+        scanf("%s", input);
+
+        char message[40];
+        strcpy(message, input);
+
+        char ** tokens;
+        int tokens_length=0;
+	
+	
+        tokens = str_split(input, DELIMITER);
+	while(*(tokens+tokens_length)){ tokens_length++;  }
+    /**printf("%d\n", tokens_length);
+    int i;
+    for(i = 0; i < tokens_length; i++)
+        {
+            printf("%s\n", tokens[i]);
+        }*/
+        char * command = tokens[0];
+
+        if(strcmp(command, GET_DEV_INFO) == 0 || strcmp(command, GET_DEV_VALUE) == 0)
+        {
+            if(tokens_length != 2)
+            {
+                printf("Invalid number of arguments, please input --help for assistance.\n");
+                continue;
+            }
+        }
+        else if(strcmp(command, SET_DEV_INFO) == 0 || strcmp(command, SET_DEV_VALUE) == 0)
+        {
+            if(tokens_length != 3)
+            {
+                printf("Invalid number of arguments, please input --help for assistance.\n");
+                continue;
+            }
+        }else if(strcmp(command, HELP) == 0)
+        {
+            help();
+        }
+        else
+        {
+            printf("Unrecognized command, please input --help for assistance.\n");
+        }
+
+        //char * message = trim(input, BLANKSPACE);
+        //printf("%s\n", message);
+
+        mqtt_publish((packet.client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+
+        free(tokens);
+    }
+
+    //while(fgetc(stdin) != EOF);
+   /*
+    while(1)
+    {
+
+        strcpy(message,get_user_input());
 		mqtt_publish((packet.client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
     }*/
-    
+
     exit(0);
 
 
 
-  
+
     /* disconnect */
     printf("\n%s disconnecting from %s\n", argv[0], addr);
     sleep(1);
 
-    /* exit */ 
+    /* exit */
     exit_example(EXIT_SUCCESS, sockfd, &client_daemon);
 }
 
 
 
-void publish_callback(void** unused, struct mqtt_response_publish *published) 
+void publish_callback(void** unused, struct mqtt_response_publish *published)
 {
-   
-    string_cpy(& callback_packet.topic,published->topic_name, published->topic_name_size);  
+
+    string_cpy(& callback_packet.topic,published->topic_name, published->topic_name_size);
     string_cpy(& callback_packet.mes,published->application_message, published->application_message_size);
 
     printf("Od kontrolera: %s\n" , callback_packet.mes);
-    
+
 
 }
 
