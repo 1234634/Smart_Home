@@ -25,7 +25,8 @@
 #define PROPERTY_CHANGED "PropertyChanged"
 #define SENSOR_MES "Sensor_Mes"
 #define DELIMITER '.'
-
+#define SENZORSKI_PI_TOPIC "senzorski_pi"
+#define AKTUATORSKI_PI_TOPIC "aktuatorski_pi"
 
 
 static Device Devices[MAX_DEVICES];
@@ -111,20 +112,10 @@ int main(int argc, const char *argv[])
     snprintf(temperature_sensor.info,212,"id: %s; Group: %s",temperature_sensor.id,temperature_sensor.group); 
     Devices[last_elem_index++] = temperature_sensor;    
     
-   Device temperature_aktuator;
-    strcpy(temperature_aktuator.id,"temp_aktuator_lroom");
-    strcpy(temperature_aktuator.group,ACTUATORS);
-    strcpy(temperature_aktuator.value,"OFF");
-    temperature_aktuator.gpio_pin = 15;
-    strcpy(temperature_aktuator.topic,"home/living_room/temperature");
-    snprintf(temperature_aktuator.info,212,"id: %s; Group: %s",temperature_aktuator.id,temperature_aktuator.group); 
-    temperature_aktuator.condition = 25;
-    Devices[last_elem_index++] = temperature_aktuator;
 
 
 
-    mqtt_subscribe(&client, "Kontroler", 0);
-    mqtt_subscribe(&client, "home/living_room/temperature", 0);
+    mqtt_subscribe(&client,SENZORSKI_PI_TOPIC, 0);
 
     packet.client = &client;
     packet.socket = sockfd;
@@ -204,6 +195,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
 void * sensors_value_publish(void * arg)
 {
 	int i;
+    char message[120];
+
 	while(1)
 	{
 		for ( i = 0; i < last_elem_index; i++)
@@ -212,8 +205,11 @@ void * sensors_value_publish(void * arg)
 			{
 			
 				update_sensors_value(i,&Devices,&packet); // updating state and publishing change to controler
-				mqtt_publish((packet.client), Devices[i].topic, Devices[i].value, strlen( Devices[i].value) + 1, MQTT_PUBLISH_QOS_0);
-        		printf(" published : topic:%s; %s\n",Devices[i].topic, Devices[i].value );
+
+                 sprintf(message,"%s.%s",SENSOR_MES,Devices[i].value);
+
+				mqtt_publish((packet.client), Devices[i].topic, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+        		printf(" published : topic:%s; %s\n",Devices[i].topic, message );
 
                 client_error_check(&packet);
 			}

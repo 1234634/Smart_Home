@@ -97,7 +97,7 @@ void automation_control(char** arg_tokens, char* arg_topic,Device(* arg_devices)
             { 
 		strcpy((*arg_devices)[i].value,new_dev_value);
 		sprintf(message,"%s.%s.value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
-		mqtt_publish(arg_packet->client, "home/living_room/temperature", message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+		mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 		printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
 
 

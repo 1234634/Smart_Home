@@ -14,6 +14,18 @@ struct mqtt_client_describer
 	struct mqtt_client client;
 };
 
+/*void client_error_check(struct pub_packet * arg_packet)
+{
+    
+        if ((*(arg_packet->client)).error != MQTT_OK)
+         {
+             fprintf(stderr, "error: %s\n", mqtt_error_str((*(arg_packet->client)).error));
+             exit_example(EXIT_FAILURE, arg_packet->socket, arg_packet->client_daemon);
+         }
+
+
+
+}*/
 void exit_example(int status, int sockfd, pthread_t *client_daemon)
 {
     if (sockfd != -1) close(sockfd);

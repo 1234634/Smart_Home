@@ -1,0 +1,21 @@
+#Format komande --- primer
+
+
+Get_Dev_Info.Id --- Get_Dev_Info.Temp_Sensor_1
+Set_Dev_Info.Id.Info --- Get_Dev_Info.Temp_Sensor_1.Senzor_koji_meri_temperaturu
+
+Get_Dev_Value.Id --- Get_Dev_Value.Temp_Sensor_1
+Set_Dev_Value.Id --- Set_Dev_Value.Temp_Sensor_1
+
+Get_Dev_Info.*    # dobavi o svim uredjajima 
+Get_Dev_Value.*
+
+--help # dobavi koje komande mozes 
+
+# kontrolna tacka 4 
+Get_Group_Value.Group_Name -- Get_Group_Value.Actuators
+Set_Group_Value.Group_Name -- Set_Group_Value.Actuators
+
+
+
+

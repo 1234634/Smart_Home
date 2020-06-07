@@ -15,7 +15,6 @@
 #define ACTUATORS "actuators"
 #define MAX_DEVICES 20
 #define SENSORS_READ_DELAY 3
-#define CONTROLER_TOPIC "controler"
 #define DEVICES_INFO_TOPIC "devices/info"//device tema bez oznakom funkcionalnosti
 #define DEVICES_FUNC_TOPIC "devices/func" //device tema sa oznakom funkcionalnosti
 #define GET_DEV_VALUE "Get_Dev_Value"
@@ -25,8 +24,10 @@
 #define PROPERTY_CHANGED "PropertyChanged"
 #define SENSOR_MES "Sensor_Mes"
 #define DELIMITER '.'
+#define CONTROLER_TOPIC "controler"
 #define SENZORSKI_PI_TOPIC "senzorski_pi"
 #define AKTUATORSKI_PI_TOPIC "aktuatorski_pi"
+#define UI_TOPIC "aktuatorski_pi"
 
 
 static Device Devices[MAX_DEVICES];
@@ -104,33 +105,24 @@ int main(int argc, const char *argv[])
 /********************* END_OF_INITIALISATION**************************/
 
     
-   Device temperature_aktuator;
-    strcpy(temperature_aktuator.id,"temp_aktuator_lroom");
-    strcpy(temperature_aktuator.group,ACTUATORS);
-    strcpy(temperature_aktuator.value,"OFF");
-    temperature_aktuator.gpio_pin = 15;
-    strcpy(temperature_aktuator.topic,"home/living_room/temperature");
-    snprintf(temperature_aktuator.info,212,"id: %s; Group: %s",temperature_aktuator.id,temperature_aktuator.group); 
-    temperature_aktuator.condition = 25;
-    Devices[last_elem_index++] = temperature_aktuator;
 
 
-
-    mqtt_subscribe(&client,AKTUATORSKI_PI_TOPIC, 0);
-    mqtt_subscribe(&client, "home/living_room/temperature", 0);
+    mqtt_subscribe(&client,UI_TOPIC, 0);
 
     packet.client = &client;
     packet.socket = sockfd;
     packet.client_daemon = &client_daemon;
       
-    pthread_t temp_thread;
-   pthread_create(&temp_thread,NULL,&sensors_value_publish,&packet);
 
-    pthread_join(temp_thread, NULL);
-
-//    while(fgetc(stdin) != EOF); 
-  
-    int i;
+    //while(fgetc(stdin) != EOF); 
+   /* char message[500];
+    while(1)
+    {
+   
+        strcpy(message,get_user_input());  
+		mqtt_publish((packet.client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+    }*/
+    
     exit(0);
 
 
@@ -145,81 +137,16 @@ int main(int argc, const char *argv[])
 }
 
 
-void* distribute_pub_message(void* arg)
-{
-    char** tokens;
-    tokens = str_split(callback_packet.mes, DELIMITER);
-
-    char * mes_type = *(tokens + 0);
-    if( strcmp(mes_type,SENSOR_MES) == 0)
-    {
-        automation_control(tokens,callback_packet.topic,&Devices,&packet,last_elem_index); 
-    }
-    else if(strcmp(mes_type,SET_DEV_INFO) == 0)
-    {
-     
-     printf(SET_DEV_INFO);
-     
-    }
-    else if(strcmp(mes_type,SET_DEV_VALUE) == 0)
-    {
-     
-     printf(SET_DEV_VALUE);
-     
-    }
-    else
-    {
-        //    
-    }
-    free(tokens);
-
-    return NULL;
-}
 
 void publish_callback(void** unused, struct mqtt_response_publish *published) 
 {
-     /* note that published->topic_name is NOT null-terminated (here we'll change it to a c-string) */
    
-    pthread_t temp_thread;
-
     string_cpy(& callback_packet.topic,published->topic_name, published->topic_name_size);  
     string_cpy(& callback_packet.mes,published->application_message, published->application_message_size);
 
-    printf("Received publish('%s'): %s\n",callback_packet.topic , callback_packet.mes);
+    printf("Od kontrolera: %s\n" , callback_packet.mes);
     
-   pthread_create(&temp_thread,NULL,&distribute_pub_message,NULL);
 
-}
-
-
-
-
-void * sensors_value_publish(void * arg)
-{
-	int i;
-    char message[120];
-
-	while(1)
-	{
-		for ( i = 0; i < last_elem_index; i++)
-		{
-			if( strcmp(Devices[i].group, SENSORS) == 0)
-			{
-			
-				update_sensors_value(i,&Devices,&packet); // updating state and publishing change to controler
-
-                 sprintf(message,"%s.%s",SENSOR_MES,Devices[i].value);
-
-				mqtt_publish((packet.client), Devices[i].topic, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
-        		printf(" published : topic:%s; %s\n",Devices[i].topic, message );
-
-                client_error_check(&packet);
-			}
-		}
-		sleep(SENSORS_READ_DELAY);	
-	}
-
-	return NULL;
 }
 
 
