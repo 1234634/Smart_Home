@@ -1,0 +1,14 @@
+>> Welcome to Smart Home cli
+>> List of commands : Get_Dev_Info.Id; Set_Dev_Info.Id  i tako dalje
+   for help type --help 
+
+>>user_unosi: Get_Dev_Info.
+>> Invalid command format, type --help for help;
+
+>>user_unosi: Get_Dev_Info.temp_sens
+>> Temperaturni senzor iz grupe senzora , vrednost mu nije kontrolabilna
+
+>> user_unosi: asfdfadfsd
+>>Invalid command , type --help for help;
+
+
