@@ -110,14 +110,25 @@ int main(int argc, const char *argv[])
     strcpy(temperature_aktuator.value,"OFF");
     temperature_aktuator.gpio_pin = 15;
     strcpy(temperature_aktuator.topic,"home/living_room/temperature");
-    snprintf(temperature_aktuator.info,212,"id: %s; Group: %s",temperature_aktuator.id,temperature_aktuator.group); 
+    snprintf(temperature_aktuator.info,250,"id: %s; Group: %s Controlable: %s",temperature_aktuator.id,temperature_aktuator.group,"Yes"); 
     temperature_aktuator.condition = 25;
     Devices[last_elem_index++] = temperature_aktuator;
 
 
 
+    
+    
     mqtt_subscribe(&client,AKTUATORSKI_PI_TOPIC, 0);
-    mqtt_subscribe(&client, "home/living_room/temperature", 0);
+    
+    int i;
+    for(i=0; i< last_elem_index; i++)
+    {
+        if(strcmp(Devices[i].group,ACTUATORS)==0)
+            mqtt_subscribe(&client, Devices[i].topic, 0);
+    }
+
+    mqtt_subscribe(&client,DEVICES_INFO_TOPIC, 0);
+    mqtt_subscribe(&client,DEVICES_FUNC_TOPIC, 0);
 
     packet.client = &client;
     packet.socket = sockfd;
@@ -130,7 +141,6 @@ int main(int argc, const char *argv[])
 
 //    while(fgetc(stdin) != EOF); 
   
-    int i;
     exit(0);
 
 
@@ -158,13 +168,13 @@ void* distribute_pub_message(void* arg)
     else if(strcmp(mes_type,SET_DEV_INFO) == 0)
     {
      
-     printf(SET_DEV_INFO);
+     set_dev_info(tokens,&Devices,&packet,last_elem_index);
      
     }
     else if(strcmp(mes_type,SET_DEV_VALUE) == 0)
     {
      
-     printf(SET_DEV_VALUE);
+     set_dev_value(tokens,&Devices,&packet,last_elem_index);
      
     }
     else

@@ -74,6 +74,61 @@ char* check_device_condition(int arg_cond, int arg_value )
 
 }
 
+void set_dev_value(char** arg_tokens, Device(* arg_devices)[20],struct pub_packet * arg_packet,int arg_last_elem_index)
+{
+    char * id = *(arg_tokens+1); 
+    char * new_value = *(arg_tokens+2); 
+    char message[400];
+
+
+    int i;
+    for ( i = 0; i < arg_last_elem_index; i++)
+    {
+    
+        if( strcmp((*arg_devices)[i].id, id) == 0 )
+        {  
+	        strcpy((*arg_devices)[i].value,new_value);
+
+	    	sprintf(message,"%s.%s.value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
+	    	mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+	    	printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
+
+
+		 client_error_check(arg_packet);
+
+        }
+         
+    }
+}
+
+
+void set_dev_info(char** arg_tokens, Device(* arg_devices)[20],struct pub_packet * arg_packet,int arg_last_elem_index)
+{
+    char * id = *(arg_tokens+1); 
+    char * new_info = *(arg_tokens+2); 
+    char message[400];
+
+
+    int i;
+    for ( i = 0; i < arg_last_elem_index; i++)
+    {
+    
+        if( strcmp((*arg_devices)[i].id, id) == 0 )
+        {  
+	        strcpy((*arg_devices)[i].info,new_info);
+
+	    	sprintf(message,"%s.%s.info.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].info);
+	    	mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+	    	printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
+
+
+		 client_error_check(arg_packet);
+
+        }
+         
+    }
+}
+
 
 void automation_control(char** arg_tokens, char* arg_topic,Device(* arg_devices)[20],struct pub_packet * arg_packet,int arg_last_elem_index)
 {

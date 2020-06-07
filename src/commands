@@ -5,7 +5,7 @@ Get_Dev_Info.Id --- Get_Dev_Info.Temp_Sensor_1
 Set_Dev_Info.Id.Info --- Get_Dev_Info.Temp_Sensor_1.Senzor_koji_meri_temperaturu
 
 Get_Dev_Value.Id --- Get_Dev_Value.Temp_Sensor_1
-Set_Dev_Value.Id --- Set_Dev_Value.Temp_Sensor_1
+Set_Dev_Value.Id.Value --- Set_Dev_Value.Temp_Actuator_1.ON
 
 Get_Dev_Info.*    # dobavi o svim uredjajima 
 Get_Dev_Value.*
