@@ -118,10 +118,10 @@ int main(int argc, const char *argv[])
     while(1)
     {
         printf("Please enter a command: \n");
-        char input[40];
+        char input[200];
         scanf("%s", input);
 
-        char message[40];
+        char message[200];
         strcpy(message, input);
 
         char ** tokens;
