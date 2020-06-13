@@ -29,7 +29,7 @@
 #define CONTROLER_TOPIC "controler"
 #define SENZORSKI_PI_TOPIC "senzorski_pi"
 #define AKTUATORSKI_PI_TOPIC "aktuatorski_pi"
-#define UI_TOPIC "aktuatorski_pi"
+#define UI_TOPIC "ui_topic"
 
 
 static Device Devices[MAX_DEVICES];
@@ -115,13 +115,13 @@ int main(int argc, const char *argv[])
     packet.socket = sockfd;
     packet.client_daemon = &client_daemon;
 
-    while(1)
+   while(1)
     {
         printf("Please enter a command: \n");
-        char input[200];
+        char input[40];
         scanf("%s", input);
 
-        char message[200];
+        char message[40];
         strcpy(message, input);
 
         char ** tokens;
@@ -144,7 +144,12 @@ int main(int argc, const char *argv[])
             {
                 printf("Invalid number of arguments, please input --help for assistance.\n");
                 continue;
+            
             }
+           
+            printf("Publishing: %s\n", message);
+            mqtt_publish((packet.client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+        
         }
         else if(strcmp(command, SET_DEV_INFO) == 0 || strcmp(command, SET_DEV_VALUE) == 0)
         {
@@ -153,6 +158,10 @@ int main(int argc, const char *argv[])
                 printf("Invalid number of arguments, please input --help for assistance.\n");
                 continue;
             }
+        
+            printf("Publishing: %s\n", message);
+            mqtt_publish((packet.client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+        
         }else if(strcmp(command, HELP) == 0)
         {
             help();
@@ -163,9 +172,7 @@ int main(int argc, const char *argv[])
         }
 
         //char * message = trim(input, BLANKSPACE);
-        //printf("%s\n", message);
 
-        mqtt_publish((packet.client), CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 
         free(tokens);
     }
