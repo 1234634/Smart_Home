@@ -115,7 +115,9 @@ int main(int argc, const char *argv[])
     packet.socket = sockfd;
     packet.client_daemon = &client_daemon;
 
-   while(1)
+    printf("Welcome to command line interface for Smart Home :)\n");
+    printf("To see list of available commands type --help\n");
+    while(1)
     {
         printf("Please enter a command: \n");
         char input[40];
@@ -175,6 +177,7 @@ int main(int argc, const char *argv[])
 
 
         free(tokens);
+        usleep(500000);
     }
 
     //while(fgetc(stdin) != EOF);
@@ -207,7 +210,7 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
     string_cpy(& callback_packet.topic,published->topic_name, published->topic_name_size);
     string_cpy(& callback_packet.mes,published->application_message, published->application_message_size);
 
-    printf("Od kontrolera: %s\n" , callback_packet.mes);
+    printf("Received message: %s\n" , callback_packet.mes);
 
 
 }

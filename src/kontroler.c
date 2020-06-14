@@ -285,7 +285,7 @@ void* distribute_pub_message(void* arg)
     char * target_device = tokens[1];
     //printf("%s\n", *target_device);
 
-    printf("----\n");
+    printf("----%d\n",strcmp(mes_type,GET_DEV_VALUE));
     if( strcmp(mes_type, GET_DEV_INFO) == 0)
     {
         if(strcmp(target_device, ALL_DEVICES) != 0)
@@ -324,7 +324,11 @@ void* distribute_pub_message(void* arg)
     }
     else if(strcmp(mes_type,SET_DEV_VALUE) == 0)
     {
+        printf("Requested value has been set.\n");
 
+        char message[200];
+        strcpy(message,"Requested value has been set.");
+        mqtt_publish((packet.client), UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
         //ovde kontroler samo prosledjuje a kad mu jave propertyChanged
         //onda menja i u svojoj listi uredjaja
         // ovako ko sto pise , DEVICES_FUNC_TOPIC tema funkcionalnosti
@@ -378,7 +382,7 @@ void* distribute_pub_message(void* arg)
     //
 
     }
-    free(tokens);
+    //free(tokens);
 
     return NULL;
 }

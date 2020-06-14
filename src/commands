@@ -1,21 +1,11 @@
-#Format komande --- primer
+Available commands are:
 
+Get_Dev_Info.Id          --- obtaining device info 
+Set_Dev_Info.Id.Info     --- setting device info 
+Get_Dev_Value.Id         --- obtaining device value
+Set_Dev_Value.Id.Value   --- setting device value
 
-Get_Dev_Info.Id --- Get_Dev_Info.Temp_Sensor_1
-Set_Dev_Info.Id.Info --- Get_Dev_Info.Temp_Sensor_1.Senzor_koji_meri_temperaturu
-
-Get_Dev_Value.Id --- Get_Dev_Value.Temp_Sensor_1
-Set_Dev_Value.Id.Value --- Set_Dev_Value.Temp_Actuator_1.ON
-
-Get_Dev_Info.*    # dobavi o svim uredjajima 
-Get_Dev_Value.*
-
---help # dobavi koje komande mozes 
-
-# kontrolna tacka 4 
-Get_Group_Value.Group_Name -- Get_Group_Value.Actuators
-Set_Group_Value.Group_Name -- Set_Group_Value.Actuators
-
-
+Get_Dev_Info.*           ---get info of all available devices
+Get_Dev_Value.*          ---get value of all available devices
 
 
