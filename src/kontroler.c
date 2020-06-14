@@ -276,7 +276,9 @@ void* distribute_pub_message(void* arg)
 {
 
     char** tokens;
-    tokens = str_split(callback_packet.mes, DELIMITER);
+    char message_cpy[200];
+    strcpy(message_cpy,callback_packet.mes);
+    tokens = str_split(message_cpy, DELIMITER);
 
     printf("%s\n",callback_packet.mes);
     char * mes_type = tokens[0];
@@ -405,8 +407,9 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
 	
 
     char** tokens;
-   tokens = str_split(callback_packet.mes, DELIMITER);
+   tokens = str_split((char *)published->application_message, DELIMITER);
 
+    printf("Provera('%s'): %s\n",callback_packet.topic , callback_packet.mes);
 
     //char * mes_type = *(tokens + 0);
    char * target_device = *(tokens + 1);
@@ -421,7 +424,8 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
         else
             mqtt_publish(UI_TOPIC, "ne postoji  taj device");
      * */
-   if(device_index != -1)
+   
+    if(device_index != -1)
      {
 	printf("Distribuira se \n");
 
