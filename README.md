@@ -3,10 +3,19 @@ Home that is smart.
 
 Runing:
 
-cd Smart_Home    
+You need 4 terminals in Smart_Home directory.
+
+In first type:
 make    
 ./bin/senzorski_pi
 
-in other terminal:    
-cd Smart_Home    
+In second:        
 ./bin/aktuatorski_pi
+
+In third:
+./bin/kontroler
+
+In fourth:
+./bin/command_line_interface
+
+
