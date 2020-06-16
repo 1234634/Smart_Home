@@ -7,7 +7,7 @@
 #define SENSORS "sensors"
 #define ACTUATORS "actuators"
 #define MAX_DEVICES 20
-#define SENSORS_READ_DELAY 3
+//#define SENSORS_READ_DELAY 15
 #define CONTROLER_TOPIC "controler"
 #define DEVICES_INFO_TOPIC "devices/info"//device tema bez oznakom funkcionalnosti
 #define DEVICES_FUNC_TOPIC "devices/func" //device tema sa oznakom funkcionalnosti
@@ -89,7 +89,7 @@ void set_dev_value(char** arg_tokens, Device(* arg_devices)[20],struct pub_packe
         {  
 	        strcpy((*arg_devices)[i].value,new_value);
 
-	    	sprintf(message,"%s.%s.value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
+	    	sprintf(message,"%s.%s.Value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
 	    	mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 	    	printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
 
@@ -117,7 +117,7 @@ void set_dev_info(char** arg_tokens, Device(* arg_devices)[20],struct pub_packet
         {  
 	        strcpy((*arg_devices)[i].info,new_info);
 
-	    	sprintf(message,"%s.%s.info.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].info);
+	    	sprintf(message,"%s.%s.Info.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].info);
 	    	mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 	    	printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
 
@@ -151,7 +151,7 @@ void automation_control(char** arg_tokens, char* arg_topic,Device(* arg_devices)
 	    if( strcmp((*arg_devices)[i].value, new_dev_value) != 0)
             { 
 		strcpy((*arg_devices)[i].value,new_dev_value);
-		sprintf(message,"%s.%s.value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
+		sprintf(message,"%s.%s.Value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
 		mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 		printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
 
@@ -170,7 +170,7 @@ void automation_control(char** arg_tokens, char* arg_topic,Device(* arg_devices)
 char* read_pin(int arg_pin )
 {      
         srand(time(0)); 
-        int value = (rand()%10 + 20);
+        int value = ((rand()+arg_pin)%10 + 20);
 
         static char temp[20];
         sprintf(temp,"%dlr",value);
@@ -186,7 +186,7 @@ void* update_sensors_value(int arg_index, Device(* arg_devices)[20],struct pub_p
     {
         strcpy((*arg_devices)[arg_index].value,new_value);
 
-        sprintf(message,"%s.%s.value.%s",PROPERTY_CHANGED,(*arg_devices)[arg_index].id,(*arg_devices)[arg_index].value);
+        sprintf(message,"%s.%s.Value.%s",PROPERTY_CHANGED,(*arg_devices)[arg_index].id,(*arg_devices)[arg_index].value);
         mqtt_publish(arg_packet->client, CONTROLER_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
         printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
 

@@ -108,7 +108,7 @@ int main(int argc, const char *argv[])
 /********************* END_OF_INITIALISATION**************************/
 
     
-   Device temperature_aktuator;
+   /*Device temperature_aktuator;
     strcpy(temperature_aktuator.id,"temp_aktuator_lroom");
     strcpy(temperature_aktuator.group,ACTUATORS);
     strcpy(temperature_aktuator.value,"OFF");
@@ -117,7 +117,70 @@ int main(int argc, const char *argv[])
     snprintf(temperature_aktuator.info,250,"id: %s; Group: %s Controlable: %s",temperature_aktuator.id,temperature_aktuator.group,"Yes"); 
     temperature_aktuator.condition = 25;
     Devices[last_elem_index++] = temperature_aktuator;
+*/
+    Device bedroom_temp_actuator;
+         strcpy(bedroom_temp_actuator.id, "temp_aktuator_bedroom_1");
+         strcpy(bedroom_temp_actuator.group, ACTUATORS);
+         strcpy(bedroom_temp_actuator.value, "OFF");
+         bedroom_temp_actuator.gpio_pin = 15;
+         strcpy(bedroom_temp_actuator.topic, "home/bedroom11/temperature");
+         snprintf(bedroom_temp_actuator.info, 250,"id: %s; Group: %s Controlable: %s", bedroom_temp_actuator.id, bedroom_temp_actuator.group, "Yes");
+         bedroom_temp_actuator.condition = 25;
+         Devices[last_elem_index++] = bedroom_temp_actuator;
 
+    Device bedroom_temp_actuator_2;
+         strcpy(bedroom_temp_actuator_2.id, "temp_aktuator_bedroom_2");
+         strcpy(bedroom_temp_actuator_2.group, ACTUATORS);
+         strcpy(bedroom_temp_actuator_2.value, "OFF");
+         bedroom_temp_actuator_2.gpio_pin = 15;
+         strcpy(bedroom_temp_actuator_2.topic, "home/bedroom22/temperature");
+         snprintf(bedroom_temp_actuator_2.info, 250,"id: %s; Group: %s Controlable: %s", bedroom_temp_actuator_2.id, bedroom_temp_actuator_2.group, "Yes");
+         bedroom_temp_actuator_2.condition = 25;
+         Devices[last_elem_index++] = bedroom_temp_actuator_2;
+
+
+    Device livingroom_temp_actuator;
+         strcpy(livingroom_temp_actuator.id, "temp_aktuator_livingroom");
+         strcpy(livingroom_temp_actuator.group, ACTUATORS);
+         strcpy(livingroom_temp_actuator.value, "OFF");
+         livingroom_temp_actuator.gpio_pin = 15;
+         strcpy(livingroom_temp_actuator.topic, "home/livingroom/temperature");
+         snprintf(livingroom_temp_actuator.info, 250,"id: %s; Group: %s Controlable: %s", livingroom_temp_actuator.id, livingroom_temp_actuator.group, "Yes");
+         livingroom_temp_actuator.condition = 25;
+         Devices[last_elem_index++] = livingroom_temp_actuator;
+
+
+    Device bathroom_temp_actuator;
+         strcpy(bathroom_temp_actuator.id, "temp_aktuator_bathroom");
+         strcpy(bathroom_temp_actuator.group, ACTUATORS);
+         strcpy(bathroom_temp_actuator.value, "OFF");
+         bathroom_temp_actuator.gpio_pin = 15;
+         strcpy(bathroom_temp_actuator.topic, "home/bathroom/temperature");
+         snprintf(bathroom_temp_actuator.info, 250,"id: %s; Group: %s Controlable: %s", bathroom_temp_actuator.id, bathroom_temp_actuator.group, "Yes");
+         bathroom_temp_actuator.condition = 25;
+         Devices[last_elem_index++] = bathroom_temp_actuator;
+
+
+
+    Device door_opener;
+         strcpy(door_opener.id, "door_opener");
+         strcpy(door_opener.group, ACTUATORS);
+         strcpy(door_opener.value, "OFF");
+         door_opener.gpio_pin = 15;
+         strcpy(door_opener.topic, "home/hallway/fingerprint");
+         snprintf(door_opener.info, 250,"id: %s; Group: %s Controlable: %s", door_opener.id, door_opener.group, "Yes");
+         door_opener.condition = 25;
+         Devices[last_elem_index++] = door_opener;
+
+    Device light_bulb;
+         strcpy(light_bulb.id, "light_bulb");
+         strcpy(light_bulb.group, ACTUATORS);
+         strcpy(light_bulb.value, "OFF");
+         light_bulb.gpio_pin = 15;
+         strcpy(light_bulb.topic, "home/hallway/fingerprint");
+         snprintf(light_bulb.info, 250,"id: %s; Group: %s Controlable: %s", light_bulb.id, light_bulb.group, "Yes");
+         light_bulb.condition = 25;
+         Devices[last_elem_index++] = light_bulb;
 
 
     

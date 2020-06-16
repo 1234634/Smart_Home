@@ -200,7 +200,7 @@ int main(int argc, const char *argv[])
     Device oven_sensor;
          strcpy(oven_sensor.id, "temp_sensor_oven");
          strcpy(oven_sensor.group, SENSORS);
-         strcpy(oven_sensor.value, "OFF");
+         strcpy(oven_sensor.value, "22lr");
          oven_sensor.gpio_pin = 15;
          strcpy(oven_sensor.topic, "home/kitchen/oven");
          snprintf(oven_sensor.info, 250,"id: %s; Group: %s Controllable: %s", oven_sensor.id, oven_sensor.group, "No");
