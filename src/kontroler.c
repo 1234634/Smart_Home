@@ -107,22 +107,12 @@ int main(int argc, const char *argv[])
 /********************* END_OF_INITIALISATION**************************/
 
 
- /*  Device temperature_aktuator;
-    strcpy(temperature_aktuator.id,"temp_aktuator_lroom");
-    strcpy(temperature_aktuator.group,ACTUATORS);
-    strcpy(temperature_aktuator.value,"OFF");
-    temperature_aktuator.gpio_pin = 15;
-    strcpy(temperature_aktuator.topic,"home/living_room/temperature");
-    snprintf(temperature_aktuator.info,250,"id: %s; Group: %s Controlable: %s",temperature_aktuator.id,temperature_aktuator.group,"Yes");
-    temperature_aktuator.condition = 25;
-    Devices[last_elem_index++] = temperature_aktuator;
-*///Malo C, a zamalo i pajton
     Device bedroom_temp_sensor;
          strcpy(bedroom_temp_sensor.id, "temp_sensor_bedroom_1");
          strcpy(bedroom_temp_sensor.group, SENSORS);
-         strcpy(bedroom_temp_sensor.value, "OFF");
+         strcpy(bedroom_temp_sensor.value, "23lr");
          bedroom_temp_sensor.gpio_pin = 15;
-         strcpy(bedroom_temp_sensor.topic, "home/bedroom1/temperature");
+         strcpy(bedroom_temp_sensor.topic, "home/bedroom11/temperature");
          snprintf(bedroom_temp_sensor.info, 250,"id: %s; Group: %s Controllable: %s", bedroom_temp_sensor.id, bedroom_temp_sensor.group, "No");
          bedroom_temp_sensor.condition = 25;
          Devices[last_elem_index++] = bedroom_temp_sensor;
@@ -130,9 +120,9 @@ int main(int argc, const char *argv[])
     Device bedroom_temp_sensor_2;
          strcpy(bedroom_temp_sensor_2.id, "temp_sensor_bedroom_2");
          strcpy(bedroom_temp_sensor_2.group, SENSORS);
-         strcpy(bedroom_temp_sensor_2.value, "OFF");
+         strcpy(bedroom_temp_sensor_2.value, "22lr");
          bedroom_temp_sensor_2.gpio_pin = 15;
-         strcpy(bedroom_temp_sensor_2.topic, "home/bedroom2/temperature");
+         strcpy(bedroom_temp_sensor_2.topic, "home/bedroom22/temperature");
          snprintf(bedroom_temp_sensor_2.info, 250,"id: %s; Group: %s Controllable: %s", bedroom_temp_sensor_2.id, bedroom_temp_sensor_2.group, "No");
          bedroom_temp_sensor_2.condition = 25;
          Devices[last_elem_index++] = bedroom_temp_sensor_2;
@@ -160,9 +150,9 @@ int main(int argc, const char *argv[])
     Device livingroom_temp_sensor;
          strcpy(livingroom_temp_sensor.id, "temp_sensor_livingroom");
          strcpy(livingroom_temp_sensor.group, SENSORS);
-         strcpy(livingroom_temp_sensor.value, "OFF");
+         strcpy(livingroom_temp_sensor.value, "24lr");
          livingroom_temp_sensor.gpio_pin = 15;
-         strcpy(livingroom_temp_sensor.topic, "home/livingroom/temperature");
+         strcpy(livingroom_temp_sensor.topic, "home/living_room/temperature");
          snprintf(livingroom_temp_sensor.info, 250,"id: %s; Group: %s Controllable: %s", livingroom_temp_sensor.id, livingroom_temp_sensor.group, "No");
          livingroom_temp_sensor.condition = 25;
          Devices[last_elem_index++] = livingroom_temp_sensor;
@@ -172,7 +162,7 @@ int main(int argc, const char *argv[])
          strcpy(livingroom_temp_actuator.group, ACTUATORS);
          strcpy(livingroom_temp_actuator.value, "OFF");
          livingroom_temp_actuator.gpio_pin = 15;
-         strcpy(livingroom_temp_actuator.topic, "home/livingroom/temperature");
+         strcpy(livingroom_temp_actuator.topic, "home/living_room/temperature");
          snprintf(livingroom_temp_actuator.info, 250,"id: %s; Group: %s Controlable: %s", livingroom_temp_actuator.id, livingroom_temp_actuator.group, "Yes");
          livingroom_temp_actuator.condition = 25;
          Devices[last_elem_index++] = livingroom_temp_actuator;
@@ -180,7 +170,7 @@ int main(int argc, const char *argv[])
     Device bathroom_temp_sensor;
          strcpy(bathroom_temp_sensor.id, "temp_sensor_bathroom");
          strcpy(bathroom_temp_sensor.group, SENSORS);
-         strcpy(bathroom_temp_sensor.value, "OFF");
+         strcpy(bathroom_temp_sensor.value, "11lr");
          livingroom_temp_sensor.gpio_pin = 15;
          strcpy(bathroom_temp_sensor.topic, "home/bathroom/temperature");
          snprintf(bathroom_temp_sensor.info, 250,"id: %s; Group: %s Controllable: %s", bathroom_temp_sensor.id, bathroom_temp_sensor.group, "No");
@@ -210,7 +200,7 @@ int main(int argc, const char *argv[])
     Device fingerprint_sensor;
          strcpy(fingerprint_sensor.id, "fingerprint_sensor");
          strcpy(fingerprint_sensor.group, SENSORS);
-         strcpy(fingerprint_sensor.value, "OFF");
+         strcpy(fingerprint_sensor.value, "22lr");
          fingerprint_sensor.gpio_pin = 15;
          strcpy(fingerprint_sensor.topic, "home/hallway/fingerprint");
          snprintf(fingerprint_sensor.info, 250,"id: %s; Group: %s Controllable: %s", fingerprint_sensor.id, fingerprint_sensor.group, "No");
@@ -263,7 +253,7 @@ int findDevice(char* device_name)
     int i;
     for(i = 0; i < last_elem_index; i++)
     {
-	
+
         if(strcmp(device_name, Devices[i].id) == 0)
             return i;
     }
@@ -277,15 +267,16 @@ void* distribute_pub_message(void* arg)
 
     char** tokens;
     char message_cpy[200];
-    strcpy(message_cpy,callback_packet.mes);
+    strcpy(message_cpy, callback_packet.mes);
     tokens = str_split(message_cpy, DELIMITER);
 
-    printf("%s\n",callback_packet.mes);
+
     char * mes_type = tokens[0];
     char * target_device = tokens[1];
-    //printf("%s\n", *target_device);
 
-    printf("----%d\n",strcmp(mes_type,GET_DEV_VALUE));
+
+
+
     if( strcmp(mes_type, GET_DEV_INFO) == 0)
     {
         if(strcmp(target_device, ALL_DEVICES) != 0)
@@ -297,101 +288,93 @@ void* distribute_pub_message(void* arg)
         }
         else
         {
-
+            char message[1400];
+            int i;
+            strcat(message, "\n");
+            for(i = 0; i < last_elem_index; i++ )
+            {
+                    strcat(message, Devices[i].info);
+                    strcat(message, "\n");
+            }
+            mqtt_publish((packet.client), UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
         }
-
-        //iz svoje liste deviceova nadje info
-        //mqtt_publish( UI_TOPIC, tja info sto je nasao)
-        // ne zaboravi da proveris dal je id = * i onda da spakujes
-        // sve deviceove u poruku i da mu posaljes
 
     }
     else if(strcmp(mes_type,GET_DEV_VALUE) == 0)
     {
 
-        //isto kao get dev info
+
         if(strcmp(target_device, ALL_DEVICES) != 0)
         {
             char message[200];
             strcpy(message, Devices[findDevice(target_device)].value);
-             mqtt_publish((packet.client), UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+            mqtt_publish((packet.client), UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
         }
         else
         {
-
+            char message[1400];
+            int i;
+            strcat(message, "\n");
+            for(i = 0; i < last_elem_index; i++ )
+            {
+                    strcat(message, Devices[i].id);
+                    strcat(message, " : ");
+                    strcat(message, Devices[i].value);
+                    strcat(message, "\n");
+            }
+            mqtt_publish((packet.client), UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
         }
 
     }
     else if(strcmp(mes_type,SET_DEV_VALUE) == 0)
     {
-        printf("Requested value has been set.\n");
-
-        char message[200];
-        strcpy(message,"Requested value has been set.");
-        mqtt_publish((packet.client), UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
-        //ovde kontroler samo prosledjuje a kad mu jave propertyChanged
-        //onda menja i u svojoj listi uredjaja
-        // ovako ko sto pise , DEVICES_FUNC_TOPIC tema funkcionalnosti
-        // na tu temu se pretplacuju aktuatori jer su im values controlabilne
-         // mqtt_publish((packet.client), DEVICES_FUNC_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
-         // printf(" published : topic:%s; %s\n",DEVICES_FUNC_TOPIC, message );
-
-     //mqtt_publish(UI_TOPIC...); odmah javi UI da je setovano
-
-     if(strcmp(target_device, ALL_DEVICES) != 0)
-        {
-            //strcpy(message, Devices[findDevice(target_device)].info);
-        }
-        else
-        {
-
-        }
-
-
+        
+    	 char message[200];
+         strcpy(message,"Requested value has been set.\n");
+	 mqtt_publish((packet.client), UI_TOPIC,message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+	
+   	 strcpy(message,callback_packet.mes);
+   	 mqtt_publish((packet.client), DEVICES_FUNC_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+        
 
     }
     else if(strcmp(mes_type,SET_DEV_INFO) == 0)
     {
 
-        // slicno prethodnoj samo je topic INFO
-         // mqtt_publish((packet.client), DEVICES_INFO_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
-         // printf(" published : topic:%s; %s\n",DEVICES_FUNC_TOPIC, message );
-
-     //mqtt_publish(UI_TOPIC...); odmah javi UI da je setovano
-
-         if(strcmp(target_device, ALL_DEVICES) != 0)
-        {
-            //strcpy(message, Devices[findDevice(target_device)].info);
-        }
-        else
-        {
-
-        }
+    	 char message[200];
+         strcpy(message,"Requested info has been set.\n");
+	 mqtt_publish((packet.client), UI_TOPIC,message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+            
+     strcpy(message,callback_packet.mes);
+            mqtt_publish((packet.client), DEVICES_INFO_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
+       
+       
 
     }
     else if(strcmp(mes_type,PROPERTY_CHANGED) == 0)
     {
-
-        // vidi koji se property promenio i promeni ga
-        // u svojoj listi device-ova
-
+        char* property = tokens[2];
+        char* val = tokens[3];
+        int searched_device = findDevice(target_device);
+        if(strcmp(property, "Value") == 0)
+        {
+            strcpy(Devices[searched_device].value, val);
+        }
+        else if(strcmp(property, "Info") == 0)
+        {
+            strcpy(Devices[searched_device].info, val);
+        }
     }
-    else
-    {
 
-    //
-
-    }
-    //free(tokens);
 
     return NULL;
 }
 
 void* publish_no_device(void* arg)
 {
-	
-	char * message = DEVICE_NOT_FOUND;	
-	printf("Publishujem:%s\n",message);	
+
+	char * message = DEVICE_NOT_FOUND;
+	printf("Publishujem:%s\n",message);
 	mqtt_publish((packet.client),UI_TOPIC, message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 
 	return NULL;
@@ -407,40 +390,31 @@ void publish_callback(void** unused, struct mqtt_response_publish *published)
     string_cpy(& callback_packet.topic,published->topic_name, published->topic_name_size);
     string_cpy(& callback_packet.mes,published->application_message, published->application_message_size);
 
-    printf("Received publish('%s'): %s\n",callback_packet.topic , callback_packet.mes);
-	
+    printf("Received : %s\n", callback_packet.mes);
 
+    char message_cpy[200];
+    strcpy(message_cpy, callback_packet.mes);
     char** tokens;
-   tokens = str_split((char *)published->application_message, DELIMITER);
+    tokens = str_split(message_cpy, DELIMITER);
 
-    printf("Provera('%s'): %s\n",callback_packet.topic , callback_packet.mes);
 
     //char * mes_type = *(tokens + 0);
    char * target_device = *(tokens + 1);
+   int device_index = 0;
+    if(strcmp(target_device, ALL_DEVICES) != 0)
+        device_index = findDevice(target_device);
 
-    int device_index = findDevice(target_device);
-   
 
-    /*
-        ovde prvo proveriti da li device sa tim id postoji
-        if(postoji)
-            pthread_create
-        else
-            mqtt_publish(UI_TOPIC, "ne postoji  taj device");
-     * */
-   
     if(device_index != -1)
      {
-	printf("Distribuira se \n");
 
         pthread_create(&temp_thread,NULL,&distribute_pub_message,NULL);
-	
+
      }
      else
      {
-	pthread_create(&temp_thread,NULL,&publish_no_device,NULL);
-        
-	
+        pthread_create(&temp_thread,NULL,&publish_no_device,NULL);
+
      }
 
 }

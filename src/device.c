@@ -117,6 +117,7 @@ void set_dev_info(char** arg_tokens, Device(* arg_devices)[20],struct pub_packet
         {  
 	        strcpy((*arg_devices)[i].info,new_info);
 
+             usleep(100000); 
 	    	sprintf(message,"%s.%s.Info.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].info);
 	    	mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);
 	    	printf(" published : topic:%s; message: %s \n",CONTROLER_TOPIC, message);
@@ -149,7 +150,8 @@ void automation_control(char** arg_tokens, char* arg_topic,Device(* arg_devices)
             strcpy(new_dev_value, check_device_condition((*arg_devices)[i].condition,value));
           
 	    if( strcmp((*arg_devices)[i].value, new_dev_value) != 0)
-            { 
+            {
+               usleep(100000); 
 		strcpy((*arg_devices)[i].value,new_dev_value);
 		sprintf(message,"%s.%s.Value.%s",PROPERTY_CHANGED,(*arg_devices)[i].id,(*arg_devices)[i].value);
 		mqtt_publish(arg_packet->client,CONTROLER_TOPIC , message, strlen( message) + 1, MQTT_PUBLISH_QOS_0);

@@ -14,7 +14,7 @@
 #define SENSORS "sensors"
 #define ACTUATORS "actuators"
 #define MAX_DEVICES 20
-#define SENSORS_READ_DELAY 10
+#define SENSORS_READ_DELAY 7
 #define CONTROLER_TOPIC "controler"
 #define DEVICES_INFO_TOPIC "devices/info"//device tema bez oznakom funkcionalnosti
 #define DEVICES_FUNC_TOPIC "devices/func" //device tema sa oznakom funkcionalnosti
@@ -108,15 +108,6 @@ int main(int argc, const char *argv[])
 
 /********************* END_OF_INITIALISATION**************************/
 
-/*    Device temperature_sensor;
-    strcpy(temperature_sensor.id,"temp_sensor_lroom");
-    strcpy(temperature_sensor.group,SENSORS);
-    strcpy(temperature_sensor.value,"25lr");
-    temperature_sensor.gpio_pin = 13;
-    strcpy(temperature_sensor.topic,"home/living_room/temperature");
-    snprintf(temperature_sensor.info,250,"id: %s; Group: %s Controlable: %s",temperature_sensor.id,temperature_sensor.group,"No"); 
-    Devices[last_elem_index++] = temperature_sensor;    
-  */  
 
     Device fingerprint_sensor;
          strcpy(fingerprint_sensor.id, "fingerprint_sensor");
@@ -131,7 +122,7 @@ int main(int argc, const char *argv[])
          Device bedroom_temp_sensor;
          strcpy(bedroom_temp_sensor.id, "temp_sensor_bedroom_1");
          strcpy(bedroom_temp_sensor.group, SENSORS);
-         strcpy(bedroom_temp_sensor.value, "23");
+         strcpy(bedroom_temp_sensor.value, "23lr");
          bedroom_temp_sensor.gpio_pin = 15;
          strcpy(bedroom_temp_sensor.topic, "home/bedroom11/temperature");
          snprintf(bedroom_temp_sensor.info, 250,"id: %s; Group: %s Controllable: %s", bedroom_temp_sensor.id, bedroom_temp_sensor.group, "No");
@@ -141,7 +132,7 @@ int main(int argc, const char *argv[])
     Device bedroom_temp_sensor_2;
          strcpy(bedroom_temp_sensor_2.id, "temp_sensor_bedroom_2");
          strcpy(bedroom_temp_sensor_2.group, SENSORS);
-         strcpy(bedroom_temp_sensor_2.value, "22");
+         strcpy(bedroom_temp_sensor_2.value, "22lr");
          bedroom_temp_sensor_2.gpio_pin = 15;
          strcpy(bedroom_temp_sensor_2.topic, "home/bedroom22/temperature");
          snprintf(bedroom_temp_sensor_2.info, 250,"id: %s; Group: %s Controllable: %s", bedroom_temp_sensor_2.id, bedroom_temp_sensor_2.group, "No");
@@ -152,7 +143,7 @@ int main(int argc, const char *argv[])
     Device livingroom_temp_sensor;
          strcpy(livingroom_temp_sensor.id, "temp_sensor_livingroom");
          strcpy(livingroom_temp_sensor.group, SENSORS);
-         strcpy(livingroom_temp_sensor.value, "OFF");
+         strcpy(livingroom_temp_sensor.value, "24lr");
          livingroom_temp_sensor.gpio_pin = 15;
          strcpy(livingroom_temp_sensor.topic, "home/livingroom/temperature");
          snprintf(livingroom_temp_sensor.info, 250,"id: %s; Group: %s Controllable: %s", livingroom_temp_sensor.id, livingroom_temp_sensor.group, "No");
@@ -163,7 +154,7 @@ int main(int argc, const char *argv[])
     Device bathroom_temp_sensor;
          strcpy(bathroom_temp_sensor.id, "temp_sensor_bathroom");
          strcpy(bathroom_temp_sensor.group, SENSORS);
-         strcpy(bathroom_temp_sensor.value, "11");
+         strcpy(bathroom_temp_sensor.value, "11lr");
          livingroom_temp_sensor.gpio_pin = 15;
          strcpy(bathroom_temp_sensor.topic, "home/bathroom/temperature");
          snprintf(bathroom_temp_sensor.info, 250,"id: %s; Group: %s Controllable: %s", bathroom_temp_sensor.id, bathroom_temp_sensor.group, "No");
